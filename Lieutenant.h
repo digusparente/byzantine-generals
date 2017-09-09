@@ -13,6 +13,8 @@
 #include <cstring>
 #include <vector>
 
+#define GENERAL 1
+
 using namespace std;
 
 class Lieutenant
@@ -25,6 +27,8 @@ public:
     void run();
 
 private:
+    string      mProgName;
+
     uint32_t    mIdentifier;                // host_info id
     uint16_t    mPort;                      // host_info port
     int         mMaxNumberLieutenants;      // max number of m_lieutenants
@@ -37,10 +41,16 @@ private:
 
     int         *mSocketStorage;            // store host socket info
 
+    FILE *file;
+
     void discoverLieutenants();
     int createListenSock();
     int acquireConnections();
     int acceptConnections(int listen_socket);
+
+    /* Utilities functions */
+
+    void writeToFile(string output);
 
     void clean_up();
 };

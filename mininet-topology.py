@@ -40,7 +40,8 @@ def runByzGenerals(number_generals, number_traitors):
 
         # if i != 1:
         prog_args = ("%s %s" % (str(lieutenant_id), str(number_generals)))
-        prog_other = " > log/lieutenant_" + str(lieutenant_id) + ".txt &"
+        prog_other = " &"
+        # prog_other = " > log/lieutenant_" + str(lieutenant_id) + ".txt &"
         command = lieutenant_prog + prog_args + prog_other
         # else:
         #     prog_args = ("%s %s %s" % (str(number_generals), "1", "0"))

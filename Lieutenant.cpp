@@ -7,6 +7,8 @@
 Lieutenant::Lieutenant(uint32_t id, uint16_t port, int max_lieutenants, bool traitor)
     : mIdentifier(id), mPort(port), mMaxNumberLieutenants(max_lieutenants), isTraitor(traitor)
 {
+    mProgName = (mIdentifier == GENERAL) ? "general" : "lieutenant_" + to_string(mIdentifier) ;
+
     mNumberConnections = mMaxNumberLieutenants - mIdentifier;
     mNumberAccept  = mMaxNumberLieutenants - mNumberConnections - 1;
     mHostIp   = "10.0.0." +  to_string(mIdentifier);
@@ -37,12 +39,11 @@ void Lieutenant::discoverLieutenants()
 
     /* starting point of the program */
 
-    cout << "# starting lieutenant #" << mIdentifier << endl;
-    cout << "# lieutenant address: 10.0.0." << mIdentifier << endl;
+    writeToFile("# starting " + mProgName + " with address: 10.0.0." + to_string(mIdentifier));
 
     if((listenfd = createListenSock()) < 0)
     {
-        cerr << "Error: creating listening socket. Quiting... " << endl;
+        writeToFile("Error: creating listening socket. Quiting... ");
         exit(0);
     }
 
@@ -50,7 +51,7 @@ void Lieutenant::discoverLieutenants()
 
     if(acquireConnections() < 0)
     {
-        cerr << "Error: acquiring connections with lieutenants. Quiting... " << endl;
+        writeToFile("Error: acquiring connections with lieutenants. Quiting... ");
         exit(1);
     }
 
@@ -58,7 +59,7 @@ void Lieutenant::discoverLieutenants()
 
     if(acceptConnections(listenfd) <  0)
     {
-        cerr << "Error: accepting connections from lieutenants. Quiting... " << endl;
+        writeToFile("Error: accepting connections from lieutenants. Quiting... ");
         exit(2);
     }
 }
@@ -68,7 +69,7 @@ int Lieutenant::createListenSock()
     int tmpSock;                     // temporary socket
     struct sockaddr_in server_addr;  // fill in information about connection
 
-    cout << "\n# creating listening socket..." << endl;
+    writeToFile("\n# creating listening socket...");
 
     // initialize socket structure
 
@@ -81,7 +82,7 @@ int Lieutenant::createListenSock()
 
     if((tmpSock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
     {
-        cerr << "Error: creating listening socket." << endl;
+        writeToFile("Error: creating listening socket.");
         return -1;
     }
 
@@ -89,7 +90,7 @@ int Lieutenant::createListenSock()
 
     if(bind(tmpSock, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0)
     {
-        cerr << "Error: binding the socket.\n" << endl;
+        writeToFile("Error: binding the socket.");
         return -1;
     }
 
@@ -97,7 +98,7 @@ int Lieutenant::createListenSock()
 
     if(listen(tmpSock, this->mNumberAccept) < 0)
     {
-        cerr << "Error: on listen.\n" << endl;
+        writeToFile("Error: on listen.");
         return -1;
     }
 
@@ -112,12 +113,12 @@ int Lieutenant::acquireConnections()
 
     struct sockaddr_in client_addr;
 
-    cout << "\n# create and connect() to all hosts...\n" << endl;
+    writeToFile("\n# create and connect() to all hosts...");
 
     for (target_host_id = (mIdentifier + 1); target_host_id <= mMaxNumberLieutenants; target_host_id++) {
         target_address = "10.0.0." + to_string(target_host_id);
 
-        cout << "trying to connect() to host_info " << target_address << "..." << endl;
+        writeToFile("trying to connect() to host_info " + target_address + "...");
 
         memset(&client_addr, 0, sizeof(client_addr));               // make sure the struct is empty
         client_addr.sin_family = AF_INET;                           // IPV4 family
@@ -127,28 +128,28 @@ int Lieutenant::acquireConnections()
 
         if((target_host = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
         {
-            cerr << "error creating client socket." << endl;
+            writeToFile("error creating client socket.");
             return -1;
         }
 
         if(connect(target_host, (struct sockaddr *) &client_addr, sizeof(client_addr)) < 0)
         {
-            cerr << "error connect()ing socket." << endl;
+            writeToFile("error connect()ing socket.");
             return -1;
         }
 
-        cout << "connected to host_info " << target_address << endl;
+        writeToFile("connected to host_info " + target_address);
 
         string message = to_string(mIdentifier);
 
         // send hello message to host_info 10.0.0.X
         if(send(target_host, message.c_str(), strlen(message.c_str()), 0) < 0)
         {
-            cerr << "error send()ing message to host_info 10.0.0." << target_host_id << endl;
+            writeToFile("error send()ing message to host_info 10.0.0." + to_string(target_host_id));
             return -1;
         }
 
-        cout << "message sent to host_info 10.0.0." << target_host_id << endl;
+        writeToFile("message sent to host_info 10.0.0." + to_string(target_host_id));
 
         /* TODO: add socket to socket m_storage class */
         mSocketStorage[target_host_id] = target_host;
@@ -168,28 +169,30 @@ int Lieutenant::acceptConnections(int listen_socket)
     struct sockaddr_in client_addr;
     socklen_t addrlen;                  // sockaddr_in size
 
-    cout << "\n# server accept() loop...\n" << endl;
-    cout << "\n mNumberAccept: " << mNumberAccept << endl;
+    writeToFile("\n# server accept() loop...\n");
 
     while (connections < mNumberAccept) // loop until have acquire all connections
     {
-        cout << "waiting for a new connection...\n" << endl;
+        writeToFile("waiting for a new connection...\n");
 
         if((target_host = accept(listen_socket, (struct sockaddr *) &client_addr, &addrlen)) < 0)
         {
-            cerr << "accept() failed." << endl;
+            writeToFile("accept() failed.");
             return -1;
         }
 
         if((nbytes = recv(target_host, buffer, sizeof(buffer), 0)) < 0)
         {
-            cerr << "error recv()ing message." << endl;
+            writeToFile("error recv()ing message.");
             return -1;
         }
 
         buffer[nbytes] = '\0';
 
-        cout << "accept()ed a new connection from host_info 10.0.0." << buffer << endl;
+        string output = "accept()ed a new connection from host_info 10.0.0.";
+        output.append(buffer);
+
+        writeToFile(output);
 
         /* TODO: add socket to socket m_storage class */
         mSocketStorage[atoi(buffer)] = target_host;
@@ -198,6 +201,18 @@ int Lieutenant::acceptConnections(int listen_socket)
     }
 
     return 1;
+}
+
+void Lieutenant::writeToFile(string output) {
+    string fileName = "log/" + mProgName + ".txt";
+    file = fopen(fileName.c_str(), "a");
+    if(file == nullptr){
+        cerr << "Error: opening file." << endl;
+        exit(1);
+    }
+
+    fprintf(file, "%s\n", output.c_str());
+    fclose(file);
 }
 
 void Lieutenant::clean_up()
