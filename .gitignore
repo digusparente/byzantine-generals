@@ -1,0 +1,9 @@
+# ignore objects, logs and executable folders
+bin/
+obj/
+log/
+
+# ignore archives from  CLion Ide
+cmake-build-debug/
+CMakeLists.txt
+.idea
