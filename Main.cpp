@@ -2,25 +2,32 @@
 
 #define SERVER_PORT 31337 /* TODO: receive through command line? */
 
-#include "Lieutenant.h"
+#include "Soldier.h"
 
 using namespace std;
 
 
 int main(int argc, char const *argv[])
 {
-    if(argc != 3)
+    if(argc != 5)
     {
         cerr << "Usage: " << argv[0] << "<host_info-identifier> <max-number-lieutenant>" << endl;
         exit(0);
     }
 
     uint32_t identifier = atoi(argv[1]);
-    int max_lieutenant = atoi(argv[2]);
+    int maxLieutenant = atoi(argv[2]);
 
-    Lieutenant lieutenant(identifier, SERVER_PORT, max_lieutenant, false);
+    Order order;
+    order = strcmp(argv[2], "0") == 0 ? Attack : Retreat;
 
-    lieutenant.init();
+    bool isTraitor;
+    isTraitor = strcmp(argv[3], "0") == 0 ? false : true;
+
+    Soldier soldier(identifier, SERVER_PORT, maxLieutenant, Retreat, order);
+
+    soldier.init();
+    soldier.run();
 
     cout << "\nFIM." << endl;
 

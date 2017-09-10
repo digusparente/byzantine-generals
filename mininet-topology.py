@@ -17,16 +17,13 @@ class SingleSwitchTopo(Topo):
 
 def runByzGenerals(number_generals, number_traitors):
     """Create and test a simple network"""
-    # number_generals = number_generals + 1
+    number_generals = number_generals;
 
     topo = SingleSwitchTopo(number_generals)
     net = Mininet(topo)
     net.start()
 
-    print "number_generals: ", number_generals
-
-    lieutenant_prog = "./bin/lieutenant "
-    # general_prog = "./bin/general "
+    soldier_prog = "./bin/soldier "
 
     pids = {}
 
@@ -38,15 +35,9 @@ def runByzGenerals(number_generals, number_traitors):
 
         lieutenant_id = i
 
-        # if i != 1:
-        prog_args = ("%s %s" % (str(lieutenant_id), str(number_generals)))
+        prog_args = ("%s %s %s %s" % (str(lieutenant_id), str(number_generals), "0", "0"))
         prog_other = " &"
-        # prog_other = " > log/lieutenant_" + str(lieutenant_id) + ".txt &"
-        command = lieutenant_prog + prog_args + prog_other
-        # else:
-        #     prog_args = ("%s %s %s" % (str(number_generals), "1", "0"))
-        #     prog_other = " &"
-        #     command = general_prog + prog_args + prog_other
+        command = soldier_prog + prog_args + prog_other
 
         print command
 
@@ -54,7 +45,7 @@ def runByzGenerals(number_generals, number_traitors):
 
         pids[i-1] = int(host.cmd('echo $!'))
 
-        # time.sleep(1)
+        time.sleep(1)
 
     for i in range(1, number_generals + 1):
         hostname = 'h' + str(i)

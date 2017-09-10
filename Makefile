@@ -5,35 +5,25 @@ BIN = bin
 OBJ = obj
 LOGS = log
 
-SRCL = Lieutenant
-#SRCG = General
+SRC = Soldier Main
 
-LOBJ = $(SRCL) $(addprefix Main, $(SRCL))
-#GOBJ = $(SRCG) $(addprefix Main, $(SRCG))
-
-OBJS1 = $(patsubst %, $(OBJ)/%.o, $(LOBJ))
-#OBJS2 = $(patsubst %, $(OBJ)/%.o, $(GOBJ))
+OBJS = $(patsubst %, $(OBJ)/%.o, $(SRC))
 
 .PHONY: directories all clean
 
 run:
 	@rm -rf $(LOGS)/*.txt
-	@sudo mn -c
 	@sudo python mininet-topology.py
 
-all: directories lieutenant # general
+all: directories soldier
 	@echo "Compile completed"
 
 directories:
 	@mkdir -p $(BIN) $(OBJ) $(LOGS)
 
-lieutenant: $(OBJS1)
+soldier: $(OBJS)
 	@$(CXX) -o $(BIN)/$@ $^
-	@echo "Linking Lieutenant completed"
-
-#general: $(OBJS2)
-#	@$(CXX) -o $(BIN)/$@ $^
-#	@echo "Linking General completed"
+	@echo "Linking soldier completed"
 
 $(OBJ)/%.o: %.cpp
 	@$(CXX) $(CXXFLAGS) -c $< -o $@
