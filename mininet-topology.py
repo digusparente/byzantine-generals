@@ -54,7 +54,7 @@ def runByzGenerals(number_generals, number_traitors):
 
         pids[i-1] = int(host.cmd('echo $!'))
 
-        time.sleep(1)
+        # time.sleep(1)
 
     for i in range(1, number_generals + 1):
         hostname = 'h' + str(i)

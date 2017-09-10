@@ -17,7 +17,8 @@ OBJS1 = $(patsubst %, $(OBJ)/%.o, $(LOBJ))
 .PHONY: directories all clean
 
 run:
-	rm -rf $(LOGS)/*.txt
+	@rm -rf $(LOGS)/*.txt
+	@sudo mn -c
 	@sudo python mininet-topology.py
 
 all: directories lieutenant # general

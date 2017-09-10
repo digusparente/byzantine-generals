@@ -47,7 +47,7 @@ private:
     void discoverLieutenants();
     int createListenSock();
     int acquireConnections();
-    int acceptConnections(int listen_socket);
+    int acceptConnections(int listenSocket);
 
     /* Utilities functions */
 
