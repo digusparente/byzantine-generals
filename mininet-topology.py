@@ -66,4 +66,4 @@ def runByzGenerals(number_generals, number_traitors):
 if __name__ == '__main__':
     """Tell mininet to print useful information"""
     setLogLevel('info')
-    runByzGenerals(5, 1)
+    runByzGenerals(8, 1)

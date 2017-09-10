@@ -39,7 +39,7 @@ void Lieutenant::discoverLieutenants()
 
     /* starting point of the program */
 
-    writeToFile("# starting " + mProgName + " with address: 10.0.0." + to_string(mIdentifier));
+    writeToFile("# Starting " + mProgName + " with address: 10.0.0." + to_string(mIdentifier));
 
     if((listenfd = createListenSock()) < 0)
     {
@@ -69,7 +69,7 @@ int Lieutenant::createListenSock()
     int tmpSock;                     // temporary socket
     struct sockaddr_in server_addr;  // fill in information about connection
 
-    writeToFile("\n# creating listening socket...\n");
+    writeToFile("\n# Creating listening socket...\n");
 
     // initialize socket structure
 
@@ -113,7 +113,7 @@ int Lieutenant::acquireConnections()
 
     struct sockaddr_in client_addr;
 
-    writeToFile("\n# create and connect() to all hosts...\n");
+    writeToFile("\n# Create and connect() to all hosts...\n");
 
     for (target_host_id = (mIdentifier + 1); target_host_id <= mMaxNumberLieutenants; target_host_id++) {
         targetAddress = "10.0.0." + to_string(target_host_id);
@@ -136,7 +136,7 @@ int Lieutenant::acquireConnections()
             return -1;
         }
 
-        writeToFile("\tconnected to host " + targetAddress);
+        writeToFile("\tConnected to host " + targetAddress);
 
         string message = to_string(mIdentifier);
 
@@ -161,11 +161,11 @@ int Lieutenant::acceptConnections(int listenSocket)
     char buffer[256];
     int nbytes = 0;
 
-    int newfd   ;                    // clients socket()s
+    int newfd;
     struct sockaddr_in addr;
-    socklen_t addrlen;                  // sockaddr_in size
+    socklen_t addrlen = sizeof(addr);
 
-    writeToFile("\n# server accept() loop...\n");
+    writeToFile("\n# Server accept() loop...\n");
 
     while (connections < mNumberAccept) // loop until have acquire all connections
     {
@@ -183,7 +183,7 @@ int Lieutenant::acceptConnections(int listenSocket)
 
         buffer[nbytes] = '\0';
 
-        string output = "\taccept()ed a new connection from host 10.0.0.";
+        string output = "\tAccept()ed a new connection from host 10.0.0.";
         output.append(buffer);
 
         writeToFile(output);
