@@ -82,7 +82,7 @@ int Lieutenant::createListenSock()
 
     if((tmpSock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
     {
-        writeToFile("Error: creating listening socket.");
+        printError("Error: creating listening socket.", errno);
         return -1;
     }
 
@@ -90,7 +90,7 @@ int Lieutenant::createListenSock()
 
     if(bind(tmpSock, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0)
     {
-        writeToFile("Error: binding the socket.");
+        printError("Error: binding the socket.", errno);
         return -1;
     }
 
@@ -98,7 +98,7 @@ int Lieutenant::createListenSock()
 
     if(listen(tmpSock, this->mNumberAccept) < 0)
     {
-        writeToFile("Error: on listen.");
+        printError("Error: on listen().", errno);
         return -1;
     }
 
@@ -128,13 +128,13 @@ int Lieutenant::acquireConnections()
 
         if((target_host = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
         {
-            writeToFile("error creating client socket.");
+            printf("Error: creating client socket.", errno);
             return -1;
         }
 
         if(connect(target_host, (struct sockaddr *) &client_addr, sizeof(client_addr)) < 0)
         {
-            writeToFile("error connect()ing socket.");
+            printError("Error: connect()ing to socket.", errno);
             return -1;
         }
 
@@ -145,7 +145,7 @@ int Lieutenant::acquireConnections()
         // send hello message to host_info 10.0.0.X
         if(send(target_host, message.c_str(), strlen(message.c_str()), 0) < 0)
         {
-            writeToFile("error send()ing message to host_info 10.0.0." + to_string(target_host_id));
+            printError("Error: send()ing message to host " + to_string(target_host_id), errno);
             return -1;
         }
 
@@ -177,13 +177,13 @@ int Lieutenant::acceptConnections(int listen_socket)
 
         if((target_host = accept(listen_socket, (struct sockaddr *) &client_addr, &addrlen)) < 0)
         {
-            writeToFile("accept() failed.");
+            printError("Error: accept() failed.", errno);
             return -1;
         }
 
         if((nbytes = recv(target_host, buffer, sizeof(buffer), 0)) < 0)
         {
-            writeToFile("error recv()ing message.");
+            printError("Error: recv()ing message.", errno);
             return -1;
         }
 
@@ -201,6 +201,15 @@ int Lieutenant::acceptConnections(int listen_socket)
     }
 
     return 1;
+}
+
+void Lieutenant::printError(string msg, int errorsv)
+{
+    char *errnoMessage = strerror(errorsv);
+    msg.append(" ");
+    msg.append(errnoMessage);
+
+    writeToFile(msg);
 }
 
 void Lieutenant::writeToFile(string output) {

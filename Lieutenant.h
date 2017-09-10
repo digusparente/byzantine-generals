@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <iostream>
 #include <cstring>
+#include <cerrno>
 #include <vector>
 
 #define GENERAL 1
@@ -49,6 +50,8 @@ private:
     int acceptConnections(int listen_socket);
 
     /* Utilities functions */
+
+    void printError(string msg, int errorsv);
 
     void writeToFile(string output);
 
