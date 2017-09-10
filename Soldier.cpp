@@ -40,33 +40,18 @@ void Soldier::run()
 
 void Soldier::actAsGeneral()
 {
-    for (int j = 0; j < mMaxNumberSoldiers; ++j) {
-        string newFileDescriptor = "[" + to_string(j+1) + "] => " + to_string(mSocketStorage[j]);
-
-        writeToFile(newFileDescriptor);
-    }
-
     for (int i = 1; i < mMaxNumberSoldiers; i++){
-        if(i != mIdentifier){
-
-
-            sendMessage(getOrder(), mSocketStorage[i]);
-        }
+        writeToFile("\tMessage sent to host " + to_string(i+1));
+        sendMessage(getOrder(), mSocketStorage[i]);
     }
 
-    writeToFile("\t\nOrder sent to all lieutenants. Waiting response...");
+    writeToFile("\n\tOrder sent to all lieutenants. Waiting response...");
 
     cleanup();
 }
 
 void Soldier::actAsLieutenant()
 {
-    for (int j = 0; j < mMaxNumberSoldiers; ++j) {
-        string newFileDescriptor = "[" + to_string(j+1) + "] => " + to_string(mSocketStorage[j]);
-
-        writeToFile(newFileDescriptor);
-    }
-
     int i = 0;
     int nbytes = 0;
     char buffer[256];
@@ -91,9 +76,8 @@ void Soldier::actAsLieutenant()
     }
 
     /* while rounds not finished */
-    int numberConnections = mMaxNumberSoldiers - 1;
-    bool stop = false;
-    while(numberConnections > 0) {
+    bool stopCondition = false;
+    while(!stopCondition) {
         read_fds = master; /* copy of master set */
         if (select(fdmax + 1, &read_fds, NULL, NULL, NULL) < 0) {
             printError("Error: on select().", errno);
@@ -103,21 +87,11 @@ void Soldier::actAsLieutenant()
         for (i = 0; i <= fdmax; i++) {
             if (FD_ISSET(i, &read_fds)) /* got data to read */
             {
-                string newFileDescriptor = "\nRead something from fd => " + to_string(i);
-                writeToFile(newFileDescriptor);
-
                 if ((nbytes = recv(i, buffer, sizeof(buffer), 0)) <= 0) {
                     if (nbytes == 0) /* connection closed() */
-                    {
-                        writeToFile("Connection closed with host " + to_string(i));
-                        numberConnections = numberConnections - 1;
-
-                        if(i == mSocketStorage[0])
-                            stop = true;
-
-                    } else {
-                        printError("Error: recv()ing message.", errno);
-                    }
+                        writeToFile("\tConnection closed with host " + to_string(i));
+                    else
+                        printError("\tError: recv()ing message.", errno);
 
                     close(i);           /* close socket */
                     FD_CLR(i, &master); /* remove from master set */
@@ -127,15 +101,14 @@ void Soldier::actAsLieutenant()
 
                     string message = (strcmp(buffer, "0") == 0) ? "Attack" : "Retreat";
 
-                    writeToFile("[" + to_string(i) + "] => Order received: " + message);
+                    writeToFile("\tOrder received: " + message);
 
+                    stopCondition = true;
                 }
             }
         }
-
-        if(stop)
-            break;
     }
+
     cleanup();
 }
 

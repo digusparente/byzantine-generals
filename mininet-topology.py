@@ -35,7 +35,7 @@ def runByzGenerals(number_generals, number_traitors):
 
         lieutenant_id = i
 
-        prog_args = ("%s %s %s %s" % (str(lieutenant_id), str(number_generals), "0", "0"))
+        prog_args = ("%s %s %s %s" % (str(lieutenant_id), str(number_generals), "1", "0"))
         prog_other = " &"
         command = soldier_prog + prog_args + prog_other
 
