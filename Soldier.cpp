@@ -15,7 +15,10 @@ Soldier::Soldier(uint32_t id, uint16_t port, int numberSoldiers, Order order, bo
 
     mSocketStorage = (int *) malloc(sizeof(int) * mMaxNumberSoldiers);
     mSocketStorage[mIdentifier - 1] = -1; /* does not have a socket for yourself */
+
+    srand((unsigned int) time(nullptr));
 }
+
 Soldier::~Soldier()
 {
     cleanup();
@@ -53,7 +56,7 @@ void Soldier::actAsGeneral()
 void Soldier::actAsLieutenant()
 {
     int i = 0;
-    int nbytes = 0;
+    ssize_t nbytes = 0;
     char buffer[256];
 
     fd_set master;      // master file descriptor list
@@ -79,7 +82,7 @@ void Soldier::actAsLieutenant()
     bool stopCondition = false;
     while(!stopCondition) {
         read_fds = master; /* copy of master set */
-        if (select(fdmax + 1, &read_fds, NULL, NULL, NULL) < 0) {
+        if (select(fdmax + 1, &read_fds, nullptr, nullptr, nullptr) < 0) {
             printError("Error: on select().", errno);
             exit(1);
         }
@@ -120,7 +123,8 @@ void Soldier::discoverLieutenants()
 
     /* starting point of the program */
 
-    writeToFile("# Starting " + mProgName + " with address: 10.0.0." + to_string(mIdentifier));
+    string traitor = isTraitor ? "traitor" : "not traitor" ;
+    writeToFile("# Starting " + mProgName + " (" + traitor + ") with address: 10.0.0." + to_string(mIdentifier));
 
     if((listenfd = createListenSock()) < 0)
     {
@@ -148,7 +152,7 @@ void Soldier::discoverLieutenants()
 int Soldier::createListenSock()
 {
     int tmpSock;                     // temporary socket
-    struct sockaddr_in server_addr;  // fill in information about connection
+    struct sockaddr_in server_addr = {0};  // fill in information about connection
 
     writeToFile("\n# Creating listening socket...\n");
 
@@ -192,7 +196,7 @@ int Soldier::acquireConnections()
     int target_host_id;             // target host_info identifier
     string targetAddress;          // target host_info address
 
-    struct sockaddr_in client_addr;
+    struct sockaddr_in client_addr = {0};
 
     writeToFile("\n# Create and connect() to all hosts...\n");
 
@@ -219,10 +223,11 @@ int Soldier::acquireConnections()
 
         writeToFile("\tConnect()ed to host " + targetAddress);
 
-        string message = to_string(mIdentifier);
+        char message[4];
+        sprintf(message, "%d", mIdentifier);
 
         // send hello message to host_info 10.0.0.X
-        if(send(target_host, message.c_str(), strlen(message.c_str()), 0) < 0)
+        if(send(target_host, message, sizeof(message), 0) < 0)
         {
             printError("\tError: send()ing hello message to host " + to_string(target_host_id), errno);
             return -1;
@@ -238,9 +243,10 @@ int Soldier::acquireConnections()
 int Soldier::acceptConnections(int listenSocket)
 {
     int connections = 0;
+    int hostId;
 
-    char buffer[256];
-    int nbytes = 0;
+    char buffer[4];
+    ssize_t nbytes = 0;
 
     int newfd;
     struct sockaddr_in addr;
@@ -270,7 +276,8 @@ int Soldier::acceptConnections(int listenSocket)
         writeToFile(output);
 
         /* TODO: add socket to socket m_storage class */
-        mSocketStorage[atoi(buffer) - 1] = newfd;
+        hostId = (int) strtol(buffer, (char **) nullptr, 10);
+        mSocketStorage[hostId - 1] = newfd;
 
         connections++;
     }
@@ -282,7 +289,7 @@ int Soldier::acceptConnections(int listenSocket)
 
 char const *Soldier::getOrder()
 {
-    char const *order;
+    char const *order = nullptr;
 
     if(isTraitor)
         order = ((rand() % 2) == 0) ? "1" : "0"; /* random the order because lieutenant is a traitor */
@@ -312,7 +319,8 @@ void Soldier::printError(string msg, int errorsv)
     writeToFile(msg);
 }
 
-void Soldier::writeToFile(string output) {
+void Soldier::writeToFile(string output)
+{
     string fileName = "log/" + mProgName + ".txt";
     file = fopen(fileName.c_str(), "a");
 

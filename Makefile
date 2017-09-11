@@ -13,7 +13,7 @@ OBJS = $(patsubst %, $(OBJ)/%.o, $(SRC))
 
 run:
 	@rm -rf $(LOGS)/*.txt
-	@sudo python mininet-topology.py
+	@sudo python topology.py 7 2 1 1
 
 all: directories soldier
 	@echo "Compile completed"

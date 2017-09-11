@@ -11,16 +11,22 @@ int main(int argc, char const *argv[])
 {
     if(argc != 5)
     {
-        cerr << "Usage: " << argv[0] << "<host_info-identifier> <max-number-lieutenant>" << endl;
+        cerr << "Usage: " << argv[0] << "<identifier> <lieutenants> <order> <traitor>" << endl;
         exit(0);
     }
 
-    uint32_t identifier = atoi(argv[1]);
-    int maxLieutenant = atoi(argv[2]);
+    uint32_t identifier = strtol(argv[1], (char **) nullptr, 10);
+    uint16_t maxLieutenant = strtol(argv[2], (char **) nullptr, 10);
 
-    Order order = strcmp(argv[2], "0") == 0 ? Attack : Retreat;
+    Order order;
+    if(strcmp(argv[3], "0") == 0)
+        order = Wait;
+    else if(strcmp(argv[3], "1") == 0)
+        order = Attack;
+    else if(strcmp(argv[3], "2") == 0)
+        order = Retreat;
 
-    bool isTraitor = strcmp(argv[3], "1") == 0 ? true : false;
+    bool isTraitor = strcmp(argv[4], "1") == 0 ? true : false;
 
     Soldier soldier(identifier, SERVER_PORT, maxLieutenant, order, isTraitor);
 

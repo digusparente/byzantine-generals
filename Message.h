@@ -8,7 +8,7 @@
 #include <string>
 #include <sstream>
 #include <iostream>
-#include <string.h>
+#include <cstring>
 
 #include "Order.h"
 

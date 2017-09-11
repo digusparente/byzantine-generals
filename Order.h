@@ -7,7 +7,7 @@
 
 enum Order
 {
-    Attack, Retreat
+    Wait, Attack, Retreat
 };
 
 #endif //BYZANTINE_GENERALS_ORDER_H
